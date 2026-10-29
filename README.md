@@ -1,26 +1,27 @@
-<h1 align="center">Home Screen Sections</h1>
+<h1 align="center">Home Screen Sections Encore</h1>
 <h2 align="center">A Jellyfin Plugin</h2>
 <p align="center">
-	<img alt="Logo" src="https://raw.githubusercontent.com/IAmParadox27/jellyfin-plugin-home-sections/main/src/logo.png" />
+	<img alt="Home Screen Sections Encore" src="encore/banner.png" />
 	<br />
 	<br />
-	<a href="https://github.com/IAmParadox27/jellyfin-plugin-home-sections">
-		<img alt="GPL 3.0 License" src="https://img.shields.io/github/license/IAmParadox27/jellyfin-plugin-home-sections.svg" />
+	<a href="https://github.com/ApenasAngelo/jellyfin-plugin-home-sections-encore">
+		<img alt="GPL 3.0 License" src="https://img.shields.io/github/license/ApenasAngelo/jellyfin-plugin-home-sections-encore.svg" />
 	</a>
-	<a href="https://github.com/IAmParadox27/jellyfin-plugin-home-sections/releases">
-		<img alt="Current Release" src="https://img.shields.io/github/release/IAmParadox27/jellyfin-plugin-home-sections.svg" />
-	</a>
-	<a href='https://ko-fi.com/iamparadox27' target='_blank'><img height='20' style='border:0px;height:20px;' src='https://storage.ko-fi.com/cdn/kofi4.png?v=6' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 </p>
 
-<details>
-	<summary><h2>Development Update - 20/08/2025</h2></summary>
+**Home Screen Sections Encore** is a fork of [Home Screen Sections](https://github.com/IAmParadox27/jellyfin-plugin-home-sections) by IAmParadox27. *Encore* means "once more": the same Netflix-style rows, taken further.
 
-Hey all! Things are changing with my plugins are more and more people start to use them and report issues. In order to make it easier for me to manage I'm splitting bugs and features into different areas. For feature requests please head over to <a href="https://features.iamparadox.dev/">https://features.iamparadox.dev/</a> where you'll be able to signin with GitHub and make a feature request. For bugs please report them on the relevant GitHub repo and they will be added to the <a href="https://github.com/users/IAmParadox27/projects/1/views/1">project board</a> when I've seen them. I've found myself struggling to know when issues are made and such recently so I'm also planning to create a system that will monitor a particular view for new issues that come up and send me a notification which should hopefully allow me to keep more up to date and act faster on various issues.
+The fork follows upstream closely: `main` mirrors upstream `main`, and our work lives on the `encore` branch, merged from `main` whenever upstream releases. New sections and features go into new files whenever possible, so syncing stays cheap.
 
-As with a lot of devs, I am very momentum based in my personal life coding and there are often times when these projects may appear dormant, I assure you now that I don't plan to let these projects go stale for a long time, there just might be times where there isn't an update or response for a couple weeks, but I'll try to keep that better than it has been. With all new releases to Jellyfin I will be updating as soon as possible, I have already made a start on 10.11.0 and will release an update to my plugins hopefully not long after that version is officially released!
+## What's different in Encore
 
-</details>
+| Change | Status |
+|---|---|
+| Runs on Jellyfin 12.4: the web client hooks are found automatically in the served bundle instead of being hard-coded per version | planned |
+| Own plugin GUID, name and assembly (the assembly name still contains `.HomeScreenSections`, so plugins that register sections keep working) | planned |
+| Sections load as they scroll into view, with server-side caching | planned |
+| More Netflix-style sections (remaining episodes, themed rows from TMDB keywords, anime picks, featured collections, daily picks...) | planned |
+| Library pages (Movies, Shows, mixed libraries), the Collections tab and single collection pages laid out like the home screen | planned |
 
 ## Introduction
 Home Screen Sections (HSS) is a Jellyfin plugin which allows users to update their web client's home screen to be a bit more dynamic and more "Netflixy".
@@ -93,31 +94,18 @@ The sections that are new for this plugin (and most likely the reason you would 
 ## Installation
 
 ### Prerequisites
-- This plugin is based on at least Jellyfin Version `10.10.7`, with 10.11.x also officially supported.
-- The following plugins are required to also be installed, please following their installation guides, always install the latest versions for the most stable experience:
-  - File Transformation (https://github.com/IAmParadox27/jellyfin-plugin-file-transformation)
-  - Plugin Pages (https://github.com/IAmParadox27/jellyfin-plugin-pages)
+- Jellyfin 12.4 (other versions are not tested by this fork).
+- [File Transformation](https://github.com/IAmParadox27/jellyfin-plugin-file-transformation) (required).
 
 ### Installation
-1. Add `https://www.iamparadox.dev/jellyfin/plugins/manifest.json` to your plugin repositories.
-2. Install `Home Screen Sections` from the Catalogue.
-3. Restart Jellyfin.
-4. On the user's homepage, open the hamburger menu and you should see a link for settings to "Modular Home". Click this.
-5. At the top there is a button to enable support and it will retrieve all sections that are available on your instance. Select all that apply.
-6. Save the settings. _Please note currently the user is not provided any feedback when the settings are saved_.
-7. Force refresh your webpage (or app) and you should see your new sections instead of the original ones.
-## Upcoming Features/Known Issues
-If you find an issue with any of the sections or usage of the plugin, please open an issue on GitHub.
+1. In Jellyfin, go to **Dashboard → Plugins → Repositories** and add
+   `https://raw.githubusercontent.com/ApenasAngelo/jellyfin-plugins/main/manifest.json` (releases are not published yet).
+2. If the original Home Screen Sections is installed, uninstall it first.
+3. Install **Home Screen Sections Encore** from the **Catalog** and restart Jellyfin.
+4. Configure the sections in **Dashboard → Plugins → Home Screen Sections Encore**.
+5. Refresh the browser (or wait for the app cache to clear).
 
 ### FAQ
-
-<details>
-	<summary><strong>I've updated Jellyfin to latest version but I can't see the plugin available in the catalogue</strong></summary>
-
-The likelihood is the plugin hasn't been updated for that version of Jellyfin and the plugins are strictly 1 version compatible. Please wait until an update has been pushed. If you can see the version number in the release assets then please make an issue, but if its not in the assets, please wait. I know Jellyfin has updated, I'll update when I can.
-
-</details>
-
 <details>
 	<summary><strong>I've installed the plugins and don't get any options or changes. How do I fix?</strong></summary>
 
@@ -140,45 +128,20 @@ This is common, particularly on a fresh install. The first thing you should try 
 > The easiest way to confirm whether the user is using the modular home settings is to check whether the movie posters are portrait or landscape. Due to how the cards are delivered from the backend all cards are forced to be landscape
 </details>
 
+
 ## Contribution
 
-### Translation
+This fork is tailored to a personal server. Bugs that also exist upstream belong in the [Home Screen Sections issues](https://github.com/IAmParadox27/jellyfin-plugin-home-sections/issues); issues specific to Encore are welcome here. Translations live in `src/Jellyfin.Plugin.HomeScreenSections/_Localization`, as upstream.
 
-If you would like to help translate this plugin into your language, follow the below steps:
+### Code style
 
-The plugin is setup to support language codes and language + region codes. Please use the [ISO 639-1](https://www.loc.gov/standards/iso639-2/php/code_list.php) language codes for file names. If you're including region code as well please format as `en-GB` where region codes are from [ISO 3166](https://www.iso.org/obp/ui/#search).
+Encore follows the upstream code style, so merges from upstream stay clean:
 
-If you need to add a genre to the translation list, please add it at the bottom of the language file (below the line break) with the below rules:
-
-- Please add the English name to en.json
-- Please use the English name for the key
-- Please ensure the key has no spaces or dashes
-  - The key should be in the format `GenreName` (e.g. `SciFi` or `GameShow` instead of `Sci-Fi` or `Game Show`)
-- If you are adding a full translation for `<Genre> Movies` please add the key in the format `<Genre>Movies` (without the angle brackets) to the very bottom of the file.
-  - See `de.json` for an example with "ComedyMovies" 
-
-> [!NOTE]
->
-> The initial translations were generated using AI and may not be perfect. If you find any issues with the translations, please feel free to open a PR to resolve them; I am unfortunately very monolingual, so I won't be able to spot any issues myself.
-
-1. Fork this repository
-2. Add/Edit the translation file in `src/Jellyfin.Plugin.HomeScreenSections/_Localization`
-3. Create a pull request
-
-### Code Contributions
-
-You're more than welcome to contribute to this plugin in any way that betters it, whether that's new sections or bug/performance fixes! I only ask that you follow the same code style as myself. A few points to note:
-
-- Please don't commit with any whitespace changes, might be worth turning off auto-linters
-- Please don't use `var` unless you have to due to differing namespaces between JF versions (honestly, I'm not going to gripe for the odd one, but it's good to try at least)
-- Please at least check the plugin compiles with 10.10.7 and the latest version of JF
-- Please put braces on new lines and use them even for 1 line statements
-
-As a general rule of thumb, please try to blend in with the codebase, I use a mutated hungarian notation for my coding style, I will ask for this to be followed.
-
-After following these guidelines, please create a pull request and I'll review it as soon as I can. For more complex changes, I may ask you to rebase to the `experimental` branch to give it extra testing before it gets merged across.
-
-Please declare your AI usage, if any, and if you have used AI for your change, please also declare your coding experience without AI. This won't impact whether the change is merged, it will allow me to properly and correctly review the change to ensure that nothing slips through the net.
+- no whitespace-only changes (turn off auto-formatters on upstream files);
+- avoid `var` unless namespaces differ between Jellyfin versions;
+- braces on new lines, even for one-line statements;
+- the author's "mutated hungarian" naming (`m_` fields and so on);
+- in upstream files, only short hooks marked `// Encore:`; everything else in new files.
 
 ### Adding your own sections
 > This is great an' all but I want a section that doesn't exist here. Can I make one?
@@ -228,3 +191,7 @@ When your section results method is invoked you will receive an object represent
 The `/HomeScreen/Sections`, `/HomeScreen/Section/{sectionType}` and `/ModularHomeViews/UserSettings` endpoints require authentication as an existing user. Clients can continue sending `userId`, but it must match the authenticated user, including for administrators; a different ID returns HTTP 403. Omitting `userId` from `/HomeScreen/Sections` or `GET /ModularHomeViews/UserSettings` uses the authenticated user. Section results handlers receive that user in `UserId`.
 
 You must make sure that your section results method returns a `QueryResult<BaseItemDto>`.
+
+## Credits
+
+Home Screen Sections Encore stands on the work of [IAmParadox27](https://github.com/IAmParadox27) and the contributors of [Home Screen Sections](https://github.com/IAmParadox27/jellyfin-plugin-home-sections), plus the [File Transformation](https://github.com/IAmParadox27/jellyfin-plugin-file-transformation) plugin it relies on. Licensed under the GNU GPL v3, like the original.
