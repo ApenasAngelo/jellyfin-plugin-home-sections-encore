@@ -1600,8 +1600,8 @@
                                 if (!sectionConfig) {
                                     sectionConfig = {
                                         SectionId: sectionType.Section,
-                                        Enabled: true,
-                                        AllowUserOverride: true,
+                                        Enabled: false, // Encore: new sections start off; the admin adds them
+                                        AllowUserOverride: false, // Encore: the admin decides
                                         LowerLimit: 1,
                                         UpperLimit: sectionType.Limit,
                                         ViewMode: sectionType.ViewMode,
