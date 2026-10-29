@@ -1,0 +1,9 @@
+{
+  "category": "General",
+  "description": "Fork of Home Screen Sections (IAmParadox27) for Jellyfin 12.4. Modular home screen sections configured by the server admin. The minified names it needs from jellyfin-web are found in the served bundle, so a new Jellyfin version does not leave the home screen blank. Requires File Transformation.",
+  "guid": "c358eef7-d5f3-461c-9c51-d83ee0bb3824",
+  "name": "Home Screen Sections Encore",
+  "overview": "Modular home screen sections for Jellyfin 12.4 (fork of Home Screen Sections).",
+  "owner": "ApenasAngelo",
+  "targetAbi": "12.4.0.0"
+}
