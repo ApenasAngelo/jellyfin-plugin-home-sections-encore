@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
 using System.Text.RegularExpressions;
+using Jellyfin.Plugin.HomeScreenSections.Encore;
 using Jellyfin.Plugin.HomeScreenSections.Helpers;
 using Jellyfin.Plugin.HomeScreenSections.JellyfinVersionSpecific;
 using Jellyfin.Plugin.HomeScreenSections.Library;
@@ -85,6 +86,7 @@ namespace Jellyfin.Plugin.HomeScreenSections.Services
                     Guid guid = m_registeredTransforms.GetValueOrDefault(jsChunk, Guid.NewGuid());
                     m_registeredTransforms[jsChunk] = guid;
                     m_logger.LogInformation($"Found loadSections in `{fileName}` registering transformation for it with ID '{guid}'");
+                    BundleHookResolver.LogCheck(File.ReadAllText(jsChunk), fileName, m_logger); // Encore: report the hook lookup
                     
                     JObject payload = new JObject();
                     payload.Add("id", guid.ToString());

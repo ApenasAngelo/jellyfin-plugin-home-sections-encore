@@ -376,7 +376,7 @@
                     getShapeFn = getBackdropShape;
                 }
                 
-                var imageHelper = b.Ay;
+                var imageHelper = {{imagehelper_hook}}; // Encore: found in the served bundle
                 
                 itemsContainer.getItemsHtml = getHomeScreenSectionItemsHtmlFn(userSettings.useEpisodeImagesInNextUpAndResume(), options.enableOverflow, sectionInfo.Section, cardBuilder, getShapeFn, imageHelper, appRouterParent.appRouter, cardSettings);
                 itemsContainer.parentContainer = elem;

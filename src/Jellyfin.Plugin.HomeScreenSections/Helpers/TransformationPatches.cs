@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Text.RegularExpressions;
 using Jellyfin.Plugin.HomeScreenSections.Attributes;
+using Jellyfin.Plugin.HomeScreenSections.Encore;
 using Jellyfin.Plugin.HomeScreenSections.Model;
 using MediaBrowser.Common.Net;
 
@@ -19,6 +20,14 @@ namespace Jellyfin.Plugin.HomeScreenSections.Helpers
             string thisVariableName = variableFind.Matches(parts[0]).Last().Groups[1].Value;
             string replacementText = replacementTextReader.ReadToEnd()
                 .Replace("{{this_hook}}", thisVariableName);
+
+            // Encore: find the minified names in the served bundle; if any is missing, keep the stock home screen
+            string? encoreText = BundleHookResolver.Apply(content.Contents, replacementText);
+            if (encoreText == null)
+            {
+                return content.Contents;
+            }
+            replacementText = encoreText;
 
             if (JellyfinVersionAttribute.GetVersion()?.StartsWith("10.10.7") ?? false)
             {
