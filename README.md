@@ -17,8 +17,8 @@ The fork follows upstream closely: `main` mirrors upstream `main`, and our work 
 
 | Change | Status |
 |---|---|
-| Runs on Jellyfin 12.4: the web client hooks are found automatically in the served bundle instead of being hard-coded per version | planned |
-| Own plugin GUID, name and assembly (the assembly name still contains `.HomeScreenSections`, so plugins that register sections keep working) | planned |
+| Runs on Jellyfin 12.4: the web client hooks are found automatically in the served bundle instead of being hard-coded per version; if one is missing, the stock home screen is kept | done |
+| Own plugin GUID, name and assembly (the assembly name still contains `.HomeScreenSections`, so plugins that register sections keep working) | done |
 | Sections load as they scroll into view, with server-side caching | planned |
 | More Netflix-style sections (remaining episodes, themed rows from TMDB keywords, anime picks, featured collections, daily picks...) | planned |
 | Library pages (Movies, Shows, mixed libraries), the Collections tab and single collection pages laid out like the home screen | planned |
@@ -99,7 +99,7 @@ The sections that are new for this plugin (and most likely the reason you would 
 
 ### Installation
 1. In Jellyfin, go to **Dashboard → Plugins → Repositories** and add
-   `https://raw.githubusercontent.com/ApenasAngelo/jellyfin-plugins/main/manifest.json` (releases are not published yet).
+   `https://raw.githubusercontent.com/ApenasAngelo/jellyfin-plugins/main/manifest.json`.
 2. If the original Home Screen Sections is installed, uninstall it first.
 3. Install **Home Screen Sections Encore** from the **Catalog** and restart Jellyfin.
 4. Configure the sections in **Dashboard → Plugins → Home Screen Sections Encore**.
