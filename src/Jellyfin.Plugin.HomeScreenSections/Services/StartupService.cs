@@ -65,7 +65,7 @@ namespace Jellyfin.Plugin.HomeScreenSections.Services
             List<JObject> payloads = new List<JObject>();
             {
                 JObject payload = new JObject();
-                payload.Add("id", "e531b5a0-5493-42b0-b632-619e2d06db5c");
+                payload.Add("id", "60a2bea5-604d-46dc-8f92-ec00b20be382"); // Encore: own transformation ID
                 payload.Add("fileNamePattern", "index.html");
                 payload.Add("callbackAssembly", GetType().Assembly.FullName);
                 payload.Add("callbackClass", typeof(TransformationPatches).FullName);

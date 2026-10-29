@@ -17,9 +17,9 @@ namespace Jellyfin.Plugin.HomeScreenSections
     {
         internal IServerConfigurationManager ServerConfigurationManager { get; private set; }
         
-        public override Guid Id => Guid.Parse("b8298e01-2697-407a-b44d-aa8dc795e850");
+        public override Guid Id => Guid.Parse("c358eef7-d5f3-461c-9c51-d83ee0bb3824"); // Encore: own GUID
 
-        public override string Name => "Home Screen Sections";
+        public override string Name => "Home Screen Sections Encore"; // Encore: own name
 
         public static HomeScreenSectionsPlugin Instance { get; private set; } = null!;
         
