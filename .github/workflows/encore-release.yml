@@ -25,7 +25,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Build
-        run: dotnet build "$PROJECT" -c Release -o build $BUILD_ARGS
+        run: dotnet build "$PROJECT" -c Release -o build -p:Version=${GITHUB_REF_NAME#v} $BUILD_ARGS
 
       - name: Package
         run: |

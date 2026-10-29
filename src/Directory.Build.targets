@@ -1,0 +1,23 @@
+<Project>
+  <!-- Encore: the upstream Properties/AssemblyInfo.cs pins AssemblyVersion to 3.0.0.0, and Jellyfin takes the
+       plugin version from the assembly, so updates of the Encore releases would never be offered. Replace that
+       file with the same attributes built from $(Version) (the release workflow passes -p:Version=<tag>). -->
+  <ItemGroup>
+    <Compile Remove="Properties/AssemblyInfo.cs" />
+  </ItemGroup>
+
+  <Target Name="EncoreAssemblyInfo" BeforeTargets="BeforeCompile">
+    <ItemGroup>
+      <EncoreAttribute Include="System.Reflection.AssemblyCompanyAttribute"><_Parameter1>IAmParadox27, ApenasAngelo</_Parameter1></EncoreAttribute>
+      <EncoreAttribute Include="System.Reflection.AssemblyProductAttribute"><_Parameter1>$(AssemblyName)</_Parameter1></EncoreAttribute>
+      <EncoreAttribute Include="System.Reflection.AssemblyTitleAttribute"><_Parameter1>$(AssemblyName)</_Parameter1></EncoreAttribute>
+      <EncoreAttribute Include="System.Reflection.AssemblyDescriptionAttribute"><_Parameter1></_Parameter1></EncoreAttribute>
+      <EncoreAttribute Include="System.Reflection.AssemblyVersionAttribute"><_Parameter1>$(Version)</_Parameter1></EncoreAttribute>
+      <EncoreAttribute Include="System.Reflection.AssemblyFileVersionAttribute"><_Parameter1>$(Version)</_Parameter1></EncoreAttribute>
+    </ItemGroup>
+    <WriteCodeFragment Language="C#" OutputFile="$(IntermediateOutputPath)EncoreAssemblyInfo.g.cs" AssemblyAttributes="@(EncoreAttribute)" />
+    <ItemGroup>
+      <Compile Include="$(IntermediateOutputPath)EncoreAssemblyInfo.g.cs" />
+    </ItemGroup>
+  </Target>
+</Project>
