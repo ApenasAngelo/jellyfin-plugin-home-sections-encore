@@ -28,6 +28,7 @@ namespace Jellyfin.Plugin.HomeScreenSections.Services
 
         public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
         {
+            if (string.IsNullOrWhiteSpace(HomeScreenSectionsPlugin.Instance.Configuration.LibreTranslateUrl)) return; // Encore: nothing to refresh without LibreTranslate; the upstream task only fails
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36");
             
