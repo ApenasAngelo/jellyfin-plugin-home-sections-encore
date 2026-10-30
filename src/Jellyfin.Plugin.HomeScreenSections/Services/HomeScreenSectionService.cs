@@ -102,7 +102,15 @@ namespace Jellyfin.Plugin.HomeScreenSections.Services
             // If the sections have been requested with a page hash that wasn't generated for this user, generate a new one.
             if (pageHash.HasValue && !DoesPageBelongToUser(pageHash.Value, userId))
             {
-                pageHash = GeneratePageHash(userId);
+                // Encore: the client makes up the hash, so an unknown one is adopted; replacing it drew the rows again on every page
+                if (m_dataCache.PageHashOwnerIds.TryAdd(pageHash.Value, userId))
+                {
+                    m_dataCache.PageHashExpiry.TryAdd(pageHash.Value, DateTime.UtcNow.AddHours(1));
+                }
+                else
+                {
+                    pageHash = GeneratePageHash(userId);
+                }
             }
             
             if (pageHash == null)
