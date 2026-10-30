@@ -40,6 +40,9 @@ public class EncoreGenreSection : IHomeScreenSection
         ("Suspense", new[] { "Thriller" }),
     };
 
+    private static (string Title, string[] Names)[] s_available = Array.Empty<(string, string[])>();
+    private static DateTime s_availableAt = DateTime.MinValue;
+
     public string? Section => "EncoreGenre";
     public string? DisplayText { get; set; } = "Genre (no history needed)";
     public string? AdminDescription => "Rows of movies from random genres of the catalog, for every account, even without watch history.";
@@ -87,21 +90,15 @@ public class EncoreGenreSection : IHomeScreenSection
             yield break;
         }
 
-        (string Title, string[] Names)[] shuffled = s_genres.OrderBy(_ => Random.Shared.Next()).ToArray();
-        int created = 0;
-        foreach ((string Title, string[] Names) genre in shuffled)
+        // The home page waits for this list, so which genres have enough movies is only checked once a day.
+        if (DateTime.UtcNow - s_availableAt > TimeSpan.FromDays(1))
         {
-            if (created >= instanceCount)
-            {
-                yield break;
-            }
+            s_available = s_genres.Where(x => QueryMovies(user, x.Names, c_minimumItems, new DtoOptions(false)).Count() >= c_minimumItems).ToArray();
+            s_availableAt = DateTime.UtcNow;
+        }
 
-            if (QueryMovies(user, genre.Names, c_minimumItems, new DtoOptions(false)).Count() < c_minimumItems)
-            {
-                continue;
-            }
-
-            created++;
+        foreach ((string Title, string[] Names) genre in s_available.OrderBy(_ => Random.Shared.Next()).Take(instanceCount))
+        {
             yield return new EncoreGenreSection(m_userManager, m_libraryManager, m_dtoService)
             {
                 AdditionalData = genre.Title,
