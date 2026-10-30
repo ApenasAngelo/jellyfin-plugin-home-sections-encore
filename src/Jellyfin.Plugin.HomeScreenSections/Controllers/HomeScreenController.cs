@@ -227,7 +227,8 @@ namespace Jellyfin.Plugin.HomeScreenSections.Controllers
                 Enabled = cfg.Enabled, 
                 AllowUserOverride = cfg.AllowUserOverride, 
                 PaginationEnabled = cfg.LazyLoadEnabled, 
-                NumResultsPerPage = cfg.NumSectionsPerPage
+                NumResultsPerPage = cfg.NumSectionsPerPage,
+                ChunkFile = Encore.BundleHookResolver.ChunkFile // Encore: for the stale chunk refresh
             });
         }
 

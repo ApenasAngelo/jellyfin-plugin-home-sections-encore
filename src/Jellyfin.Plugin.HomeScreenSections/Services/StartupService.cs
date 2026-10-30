@@ -86,6 +86,7 @@ namespace Jellyfin.Plugin.HomeScreenSections.Services
                     Guid guid = m_registeredTransforms.GetValueOrDefault(jsChunk, Guid.NewGuid());
                     m_registeredTransforms[jsChunk] = guid;
                     m_logger.LogInformation($"Found loadSections in `{fileName}` registering transformation for it with ID '{guid}'");
+                    BundleHookResolver.ChunkFile = fileName; // Encore: the client refreshes a stale copy of this file
                     BundleHookResolver.LogCheck(File.ReadAllText(jsChunk), fileName, m_logger); // Encore: report the hook lookup
                     
                     JObject payload = new JObject();

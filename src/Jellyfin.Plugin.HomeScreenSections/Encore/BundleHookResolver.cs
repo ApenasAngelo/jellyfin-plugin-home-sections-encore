@@ -32,6 +32,9 @@ namespace Jellyfin.Plugin.HomeScreenSections.Encore
 
         public static string? LastError { get; private set; }
 
+        /// <summary>Name of the served file that holds loadSections, for the client to refresh a stale copy.</summary>
+        public static string? ChunkFile { get; set; }
+
         /// <summary>
         /// Replaces the hook placeholders in <paramref name="replacementText"/>. Returns <c>null</c> when a required
         /// name is not found, so the caller can leave the bundle untouched and the stock home screen still renders.

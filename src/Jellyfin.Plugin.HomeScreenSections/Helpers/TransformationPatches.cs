@@ -86,7 +86,7 @@ namespace Jellyfin.Plugin.HomeScreenSections.Helpers
             
             return content.Contents!
                 .Replace("</head>", $"{replacementText0}</head>")
-                .Replace("</body>", $"{replacementText1}</body>");
+                .Replace("</body>", $"{replacementText1}{EncoreChunkRefresh.ScriptTag}</body>"); // Encore: refresh a stale chunk
         }
     }
 }

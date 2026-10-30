@@ -69,6 +69,7 @@
       <EmbeddedResource Include="Inject\HomeScreenSections.js" />
       <None Remove="Inject\HomeScreenSections.css" />
       <EmbeddedResource Include="Inject\HomeScreenSections.css" />
+      <EmbeddedResource Include="Inject\EncoreChunkRefresh.js" />
     </ItemGroup>
 
     <!-- Translation Files -->
