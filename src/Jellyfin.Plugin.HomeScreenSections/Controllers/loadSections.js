@@ -492,6 +492,44 @@
             window.HssPageMeta.ScrollHandler = hssScrollHandler;
             
             window.addEventListener('scroll', hssScrollHandler);
+
+            // Encore: the upstream handler only fires at the very end of the page, and never on a page that fits the screen. A marker a
+            // little above the end of the rows loads the next page when it comes into view.
+            if (hssMeta.PaginationEnabled && elem.parentNode) {
+                var encoreOld = document.getElementById('encorePagingMarker');
+                if (encoreOld) { encoreOld.remove(); }
+                if (window.HssEncoreObserver) { window.HssEncoreObserver.disconnect(); }
+                var encoreMarker = document.createElement('div');
+                encoreMarker.id = 'encorePagingMarker';
+                encoreMarker.style.cssText = 'height:800px;margin-top:-800px;pointer-events:none;visibility:hidden';
+                elem.parentNode.insertBefore(encoreMarker, elem.nextSibling);
+                var encoreWatch = function () {
+                    // Waits for the new rows to take their place; a marker still in view then means the next page.
+                    setTimeout(function () {
+                        if (window.HssPageMeta.Finished !== true && encoreMarker.isConnected) {
+                            window.HssEncoreObserver.unobserve(encoreMarker);
+                            window.HssEncoreObserver.observe(encoreMarker);
+                        }
+                    }, 1500);
+                };
+                window.HssEncoreObserver = new IntersectionObserver(function (entries) {
+                    if (!entries[entries.length - 1].isIntersecting || window.HssPageMeta.IsLoading === true || window.HssPageMeta.Finished === true) {
+                        return;
+                    }
+                    window.HssEncoreObserver.unobserve(encoreMarker);
+                    window.HssPageMeta.IsLoading = true;
+                    var encoreDone = function () {
+                        if (window.HssPageMeta.IsLoading === true) {
+                            window.HssPageMeta.IsLoading = false;
+                            encoreWatch();
+                        }
+                    };
+                    // A row that never answers cannot hold the rows after it.
+                    setTimeout(encoreDone, 6000);
+                    _this.loadSections(window.HssPageCache.elem, window.HssPageCache.apiClient, window.HssPageCache.user, window.HssPageCache.userSettings, window.HssPageMeta.Page + 1).then(encoreDone, encoreDone);
+                });
+                encoreWatch();
+            }
         }
         
         var getSectionsData = {
