@@ -72,6 +72,9 @@
 
     // The home page stays open between these pages, and only redraws when told its settings changed.
     function redraw() {
+        if (!/^#\/home(\?|$)/.test(location.hash)) {
+            return; // leaving for a title: the page is still in view, and keeps its rows and position for the way back
+        }
         var sections = document.querySelector('.homePage:not(.hide) .sections');
         if (!sections || sections.dataset.encoreView === undefined || params(location.hash).has('tab')) {
             return;
