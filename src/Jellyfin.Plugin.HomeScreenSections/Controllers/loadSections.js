@@ -45,6 +45,10 @@
         return;
     }
 
+    // Encore: a library or collection page is this same home page, showing only its titles
+    var encoreView = window.EncoreViews ? window.EncoreViews.current() : null;
+    if (elem) { elem.dataset.encoreView = encoreView || ''; }
+
     function escapeHtml(value) {
         return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
@@ -80,6 +84,8 @@
                 Language: localStorage.getItem(apiClient.getCurrentUserId() + '-language')
             };
             
+            if (encoreView) { queryParams.View = encoreView; } // Encore: the row only shows titles of this page
+
             if (sectionInfo.Section === 'NextUp') {
                 var cutoffDate = new Date();
                 cutoffDate.setDate(cutoffDate.getDate() - _userSettings.maxDaysForNextUp());
@@ -309,6 +315,8 @@
                         serverId: apiClient.serverId()
                     })
                 }
+
+                if (sectionInfo.Section === 'EncoreCollectionRow' && window.EncoreViews) { route = window.EncoreViews.collectionUrl(sectionInfo.AdditionalData); } // Encore: opens the collection in this format
 
                 html += '<a is="emby-linkbutton" href="' + escapeHtml(safeUrl(route)) + '" class="button-flat button-flat-mini sectionTitleTextButton">';
                 html += '<h2 class="sectionTitle sectionTitle-cards">';
@@ -545,9 +553,16 @@
             window.HssPageMeta.Finished = true;
         }
 
-        var getSectionsUrl = apiClient.getUrl("HomeScreen/Sections", getSectionsData);
+        // Encore: the rows of a library or collection, with the same paging
+        if (encoreView) { getSectionsData.View = encoreView; }
+        var encorePageHash = window.HssPageMeta.PageHash;
+        var getSectionsUrl = apiClient.getUrl(encoreView ? "HomeScreen/Encore/View" : "HomeScreen/Sections", getSectionsData);
 
         return apiClient.getJSON(getSectionsUrl).then(function (response) {
+            if (encorePageHash !== window.HssPageMeta.PageHash) {
+                // Encore: the user went to another page meanwhile; this answer must not draw over it
+                return;
+            }
             if (response.TotalRecordCount === 0 && window.HssPageMeta.Page > 1) {
                 window.HssPageMeta.Finished = true;
                 // Just a do nothing function

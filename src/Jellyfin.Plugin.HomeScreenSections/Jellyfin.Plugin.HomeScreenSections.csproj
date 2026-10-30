@@ -70,6 +70,7 @@
       <None Remove="Inject\HomeScreenSections.css" />
       <EmbeddedResource Include="Inject\HomeScreenSections.css" />
       <EmbeddedResource Include="Inject\EncoreChunkRefresh.js" />
+      <EmbeddedResource Include="Inject\EncoreViews.js" />
     </ItemGroup>
 
     <!-- Translation Files -->

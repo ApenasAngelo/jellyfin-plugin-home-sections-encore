@@ -4,7 +4,9 @@
     var KEY = 'encore-chunk-refreshed', tries = 0;
 
     function check() {
-        if (window.HssPageMeta || tries > 20) {
+        // A copy from before the library pages has HssPageMeta but does not mark the sections it draws.
+        var sections = document.querySelector('.homePage:not(.hide) .sections');
+        if ((window.HssPageMeta && sections && sections.dataset.encoreView !== undefined) || tries > 20) {
             return clearInterval(timer);
         }
         if (location.hash.indexOf('#/home') !== 0 || !window.ApiClient || !document.querySelector('.homeSectionsContainer .verticalSection')) {
