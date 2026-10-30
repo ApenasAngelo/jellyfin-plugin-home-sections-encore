@@ -121,7 +121,10 @@
 
     ['wheel', 'touchstart', 'mousedown', 'keydown'].forEach(function (name) {
         window.addEventListener(name, function () {
-            restoring = null; // the user took over
+            // The user took over. A swipe back on a trackpad still sends wheel events for a moment after it ends.
+            if (restoring && (name !== 'wheel' || Date.now() - restoring.started > 1500)) {
+                restoring = null;
+            }
         }, { capture: true, passive: true });
     });
     window.addEventListener('scroll', remember, { passive: true });
@@ -221,7 +224,7 @@
             }
             restoring = null;
             if (saved[hash] && saved[hash].scroll > 0) {
-                restoring = { hash: hash, scroll: saved[hash].scroll, pageHash: saved[hash].pageHash, steady: 0, until: Date.now() + 15000 };
+                restoring = { hash: hash, scroll: saved[hash].scroll, pageHash: saved[hash].pageHash, steady: 0, started: Date.now(), until: Date.now() + 15000 };
             }
             var goTo = target(hash, false);
             if (goTo) {
