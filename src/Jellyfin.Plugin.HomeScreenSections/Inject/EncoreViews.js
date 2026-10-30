@@ -7,6 +7,7 @@
     var HOME = /^#\/home(\.html)?(\?|$)/;
     var known = null, asked = false, lastHash = null;
     var saved = {}, last = null, restoring = null; // where each page was left, for the way back to it
+    var emptySince = null, healed = 0;
 
     function params(hash) {
         return new URLSearchParams((hash || '').split('?')[1] || '');
@@ -85,6 +86,28 @@
             sections.dispatchEvent(new CustomEvent('settingschange'));
             (document.scrollingElement || document.body).scrollTop = 0;
             document.body.scrollTop = 0;
+        }
+    }
+
+    // The last resort for a page left without rows, whatever the cause: draw it again, at most twice per visit.
+    function healEmptyPage() {
+        var sections = document.querySelector('.homePage:not(.hide) .sections');
+        if (!HOME.test(location.hash) || !sections) {
+            emptySince = null;
+            return;
+        }
+        var rows = sections.querySelectorAll('.verticalSection');
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].offsetHeight > 0 && rows[i].querySelector('.sectionTitle')) {
+                emptySince = null;
+                return;
+            }
+        }
+        emptySince = emptySince || Date.now();
+        if (Date.now() - emptySince > 10000 && healed < 2) {
+            healed++;
+            emptySince = null;
+            sections.dispatchEvent(new CustomEvent('settingschange'));
         }
     }
 
@@ -218,6 +241,8 @@
         var hash = location.hash;
         if (hash !== lastHash) {
             lastHash = hash;
+            emptySince = null;
+            healed = 0;
             if (last && last.hash !== hash) {
                 saved[last.hash] = last;
                 last = null;
@@ -235,6 +260,7 @@
         hideOtherPages();
         remember();
         redraw();
+        healEmptyPage();
         seeAll();
         nameMixedGrid();
     }

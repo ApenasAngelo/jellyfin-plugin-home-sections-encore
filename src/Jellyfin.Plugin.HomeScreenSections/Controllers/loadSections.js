@@ -47,6 +47,13 @@
 
     // Encore: a library or collection page is this same home page, showing only its titles
     var encoreView = window.EncoreViews ? window.EncoreViews.current() : null;
+    // Encore: only the newest load may draw. Two loads of the same page can cross (the way back reuses its PageHash), and the
+    // older one then redraws rows the newer one is filling, which can leave them hidden. Rows of another page leave at once.
+    if (page === null) {
+        window.HssEncoreLoad = (window.HssEncoreLoad || 0) + 1;
+        if (elem && elem.dataset.encoreView !== undefined && elem.dataset.encoreView !== (encoreView || '')) { elem.innerHTML = ''; }
+    }
+    var encoreLoad = window.HssEncoreLoad;
     if (elem) { elem.dataset.encoreView = encoreView || ''; }
 
     function escapeHtml(value) {
@@ -420,6 +427,7 @@
     var _this = this;
 
     return getHomeScreenSectionsMeta(apiClient).then(function (hssMeta) {
+        if (encoreLoad !== window.HssEncoreLoad) { return; } // Encore: a newer load took over
         var useHss = isUserUsingHomeScreenSections(hssMeta, userSettings);
         
         if (!useHss) {
@@ -555,12 +563,11 @@
 
         // Encore: the rows of a library or collection, with the same paging
         if (encoreView) { getSectionsData.View = encoreView; }
-        var encorePageHash = window.HssPageMeta.PageHash;
         var getSectionsUrl = apiClient.getUrl(encoreView ? "HomeScreen/Encore/View" : "HomeScreen/Sections", getSectionsData);
 
         return apiClient.getJSON(getSectionsUrl).then(function (response) {
-            if (encorePageHash !== window.HssPageMeta.PageHash) {
-                // Encore: the user went to another page meanwhile; this answer must not draw over it
+            if (encoreLoad !== window.HssEncoreLoad) {
+                // Encore: a newer load took over; this answer must not draw over it
                 return;
             }
             if (response.TotalRecordCount === 0 && window.HssPageMeta.Page > 1) {
@@ -717,6 +724,7 @@
                 }))
             }(elem, apiClient, user, userSettings);
         }, function (error) {
+            if (encoreLoad !== window.HssEncoreLoad) { return; } // Encore: a newer load took over
             console.error("Error fetching sections with HSS, defaulting back to Jellyfin:", error);
             return _this.originalLoadSections(elem, apiClient, user, userSettings);
         });
