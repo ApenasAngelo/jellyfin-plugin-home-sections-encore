@@ -75,11 +75,17 @@ public class EncoreCatalog
         get
         {
             IReadOnlyList<EncoreEntry>? entries = m_entries;
-            if (entries == null)
+            if (entries == null || entries.Count == 0)
             {
+                // An empty list is not kept: it would hide every catalog row for a day.
                 lock (m_lock)
                 {
-                    return m_entries ??= Build();
+                    if (m_entries == null || m_entries.Count == 0)
+                    {
+                        m_entries = Build();
+                    }
+
+                    return m_entries;
                 }
             }
 
