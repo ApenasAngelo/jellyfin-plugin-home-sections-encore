@@ -52,6 +52,7 @@ namespace Jellyfin.Plugin.HomeScreenSections.HomeScreen
         
         public void RegisterBuiltInResultsDelegates()
         {
+            RegisterResultsDelegate<Sections.Encore.EncoreGenreSection>(); // Encore: rows that need no watch history
             RegisterResultsDelegate<MyMediaSection>();
             
             RegisterResultsDelegate<ContinueWatchingSection>();
