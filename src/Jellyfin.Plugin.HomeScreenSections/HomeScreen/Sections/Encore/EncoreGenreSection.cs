@@ -64,7 +64,7 @@ public class EncoreGenreSection : IHomeScreenSection
 
     public QueryResult<BaseItemDto> GetResults(HomeScreenSectionPayload payload, IQueryCollection queryCollection)
     {
-        (string Title, string[] Names) genre = s_genres.FirstOrDefault(x => x.Title == payload.AdditionalData);
+        (string Title, string[] Names) genre = s_genres.FirstOrDefault(x => GetKey(x.Names) == payload.AdditionalData);
         if (genre.Names == null)
         {
             return new QueryResult<BaseItemDto>();
@@ -101,7 +101,7 @@ public class EncoreGenreSection : IHomeScreenSection
         {
             yield return new EncoreGenreSection(m_userManager, m_libraryManager, m_dtoService)
             {
-                AdditionalData = genre.Title,
+                AdditionalData = GetKey(genre.Names),
                 DisplayText = genre.Title,
                 OriginalPayload = m_dtoService.GetBaseItemDto(m_libraryManager.GetGenre(genre.Names[0]), new DtoOptions(), user)
             };
@@ -122,6 +122,9 @@ public class EncoreGenreSection : IHomeScreenSection
             PluginConfigurationOptions = (this as IHomeScreenSection).GetPluginConfigurationOptions().ToArray()
         };
     }
+
+    // The client turns this into a CSS class and only replaces the first space: a second one loses the whole row.
+    private static string GetKey(string[] names) => names[0].Replace(" ", string.Empty);
 
     private IEnumerable<BaseItem> QueryMovies(User? user, string[] genres, int limit, DtoOptions dtoOptions)
     {
