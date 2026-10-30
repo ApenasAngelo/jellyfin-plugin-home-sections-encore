@@ -4,7 +4,9 @@
     var LIBRARY = /^#\/(movies|tv|mixed|boxsets|homevideos)\?/;
     var DETAILS = /^#\/details\?/;
     var GRID_KEY = 'encore-grid-library'; // the library whose grid was asked for: its links keep the grid until a menu click
+    var HOME = /^#\/home(\.html)?(\?|$)/;
     var known = null, asked = false, lastHash = null;
+    var saved = {}, last = null, restoring = null; // where each page was left, for the way back to it
 
     function params(hash) {
         return new URLSearchParams((hash || '').split('?')[1] || '');
@@ -86,14 +88,60 @@
         }
     }
 
+    function drawnHere() {
+        var sections = document.querySelector('.homePage:not(.hide) .sections');
+        return HOME.test(location.hash) && window.HssPageMeta && sections && sections.dataset.encoreView === (current() || '') && sections.querySelector('.verticalSection');
+    }
+
+    function remember() {
+        if (!restoring && drawnHere()) {
+            last = { hash: location.hash, scroll: window.scrollY, pageHash: window.HssPageMeta.PageHash };
+        }
+    }
+
+    // Going back shows the page as it was left: same rows in the same order, at the same height. Scrolling down also loads
+    // the pages of rows on the way, so it repeats until the height is reached. A menu or link click opens the page anew.
+    function restore() {
+        if (!restoring) {
+            return;
+        }
+        if (location.hash !== restoring.hash || Date.now() > restoring.until) {
+            restoring = null;
+            return;
+        }
+        if (!drawnHere() || window.HssPageMeta.PageHash !== restoring.pageHash) {
+            return;
+        }
+        window.scrollTo(0, restoring.scroll);
+        restoring.steady = Math.abs(window.scrollY - restoring.scroll) < 5 ? restoring.steady + 1 : 0;
+        if (restoring.steady >= 4) {
+            restoring = null;
+        }
+    }
+
+    ['wheel', 'touchstart', 'mousedown', 'keydown'].forEach(function (name) {
+        window.addEventListener(name, function () {
+            restoring = null; // the user took over
+        }, { capture: true, passive: true });
+    });
+    window.addEventListener('scroll', remember, { passive: true });
+    setInterval(restore, 150);
+
     function seeAll() {
         document.body.classList.toggle('encore-view', !!current());
         var sections = document.querySelector('.homePage:not(.hide) .homeSectionsContainer');
-        if (!sections || !current() || sections.querySelector('#encoreSeeAll')) {
+        if (!sections || !current()) {
             return;
         }
         var url = gridUrl(location.hash);
         if (!url) {
+            return;
+        }
+        var existing = sections.querySelector('#encoreSeeAll a');
+        if (existing) {
+            if (existing.getAttribute('href') !== url) {
+                existing.setAttribute('href', url); // the same rows area can already be showing another page
+            }
             return;
         }
         var row = document.createElement('div');
@@ -143,11 +191,22 @@
             return;
         }
         var hash = link.getAttribute('href'), goTo = target(hash, true);
+        delete saved[hash];
+        if (!goTo && HOME.test(hash) && HOME.test(location.hash)) {
+            // The router waits for a new page to appear before the next navigation, and here the same page stays open: it
+            // would hold every click after this one until some other page opened, and then run them late.
+            goTo = hash;
+        }
         if (goTo) {
+            delete saved[goTo];
             event.preventDefault();
             event.stopImmediatePropagation();
             storage('remove');
-            location.hash = goTo;
+            if (goTo === location.hash) {
+                window.scrollTo(0, 0);
+            } else {
+                location.hash = goTo;
+            }
         }
     }, true);
 
@@ -156,6 +215,14 @@
         var hash = location.hash;
         if (hash !== lastHash) {
             lastHash = hash;
+            if (last && last.hash !== hash) {
+                saved[last.hash] = last;
+                last = null;
+            }
+            restoring = null;
+            if (saved[hash] && saved[hash].scroll > 0) {
+                restoring = { hash: hash, scroll: saved[hash].scroll, pageHash: saved[hash].pageHash, steady: 0, until: Date.now() + 15000 };
+            }
             var goTo = target(hash, false);
             if (goTo) {
                 location.replace(goTo);
@@ -163,12 +230,19 @@
             }
         }
         hideOtherPages();
+        remember();
         redraw();
         seeAll();
         nameMixedGrid();
     }
 
-    window.EncoreViews = { current: current, collectionUrl: collectionUrl };
+    window.EncoreViews = {
+        current: current,
+        collectionUrl: collectionUrl,
+        savedPageHash: function () {
+            return saved[location.hash] ? saved[location.hash].pageHash : null;
+        }
+    };
     window.addEventListener('hashchange', check);
     setInterval(check, 300); // the app also navigates without a hashchange event
 })();

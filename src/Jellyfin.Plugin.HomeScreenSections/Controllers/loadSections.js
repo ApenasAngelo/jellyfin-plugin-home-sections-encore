@@ -435,7 +435,7 @@
                 ResultsPerPage: hssMeta.NumResultsPerPage,
                 LastScrollHeight: 0,
                 ScrollThreshold: 10,
-                PageHash: uuidv4(),
+                PageHash: (window.EncoreViews && window.EncoreViews.savedPageHash()) || uuidv4(), // Encore: the way back keeps the order
                 ScrollHandler: null
             };
             
