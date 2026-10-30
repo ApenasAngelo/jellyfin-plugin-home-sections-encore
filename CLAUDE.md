@@ -70,6 +70,18 @@ desenvolvimento é feito pela sessão **ops** (não há sessão de Remote Contro
 - Paginação: marcador no fim das fileiras (`IntersectionObserver`), o gatilho de rolagem do autor continua lá. `PageHash` vem do cliente.
 - Nas capturas e testes, o navegador precisa de `locale`: sem ele o Jellyfin lança `Invalid language tag` e as fileiras ficam vazias.
 
+## Páginas no formato da home (fase 3, 2026-10-30)
+
+- Filmes, Séries, Animes, Coleções e a página de uma coleção **são a própria home**: `#/home?topParentId=<id>` (coleção: mais
+  `&encoreCollection=<id>`; aba Coleções: mais `&encoreKind=boxsets`). O menu marca a aba sozinho pelo `topParentId`.
+  Por que não dentro das páginas nativas: em `/movies`, `/tv`, `/mixed` e `/boxsets` o chunk do `loadSections` nem é carregado.
+- `Inject/EncoreViews.js`: reescreve links nativos (clique em captura no `window`, mais verificação a cada 300 ms, porque o app
+  navega sem `hashchange`), redesenha a home com o evento `settingschange` no `.sections` (a mesma instância da página continua aberta) e
+  põe o botão "Ver tudo". A grade nativa fica por `sessionStorage` (`encore-grid-library`), limpo no próximo clique do menu.
+- Servidor: `Controllers/EncoreViewsController.cs` (`HomeScreen/Encore/Views` e `/View`), sem cache de página: a lista é calculada e a
+  ordem vem do `PageHash`. Fileiras leem o parâmetro `View` (`EncoreCatalog.ScopeOf`). Com o HSS desligado, os links ficam como estão.
+- `elem.dataset.encoreView` marca a home desenhada e também denuncia chunk antigo (`EncoreChunkRefresh.js`).
+
 ## Cuidados com o servidor
 
 - **PreProbe do Gelato:** abrir um item por `GET /Items/{id}` ou `/Users/{u}/Items/{id}`, ou pedir `MediaSources`, faz o
