@@ -52,7 +52,17 @@ namespace Jellyfin.Plugin.HomeScreenSections.HomeScreen
         
         public void RegisterBuiltInResultsDelegates()
         {
-            RegisterResultsDelegate<Sections.Encore.EncoreGenreSection>(); // Encore: rows that need no watch history
+            RegisterResultsDelegate<Sections.Encore.EncoreGenreSection>(); // Encore: own rows
+            RegisterResultsDelegate<Sections.Encore.EncoreSeriesGenreSection>(); // Encore: own rows
+            RegisterResultsDelegate<Sections.Encore.EncoreAnimeGenreSection>(); // Encore: own rows
+            RegisterResultsDelegate<Sections.Encore.EncoreKeywordSection>(); // Encore: own rows
+            RegisterResultsDelegate<Sections.Encore.EncoreDailyPicksSection>(); // Encore: own rows
+            RegisterResultsDelegate<Sections.Encore.EncoreNationalSection>(); // Encore: own rows
+            RegisterResultsDelegate<Sections.Encore.EncoreSeasonalSection>(); // Encore: own rows
+            RegisterResultsDelegate<Sections.Encore.EncoreMyListSection>(); // Encore: own rows
+            RegisterResultsDelegate<Sections.Encore.EncoreAlmostDoneSection>(); // Encore: own rows
+            RegisterResultsDelegate<Sections.Encore.EncoreWatchAgainSection>(); // Encore: own rows
+            RegisterResultsDelegate<Sections.Encore.EncoreForYouSection>(); // Encore: own rows
             RegisterResultsDelegate<MyMediaSection>();
             
             RegisterResultsDelegate<ContinueWatchingSection>();

@@ -30,6 +30,9 @@ namespace Jellyfin.Plugin.HomeScreenSections
             });
             serviceCollection.AddSingleton<UserSectionsDataCache>();
             serviceCollection.AddSingleton<PerUserComputedStatsCache>();
+            serviceCollection.AddSingleton<Encore.EncoreCatalog>(); // Encore: own rows
+            serviceCollection.AddSingleton<Encore.EncoreHistory>(); // Encore: own rows
+            serviceCollection.AddSingleton<Encore.EncoreRecommendations>(); // Encore: own rows
             serviceCollection.AddSingleton<ITranslationManager, TranslationManager>();
             serviceCollection.AddSingleton<IHomeScreenManager, HomeScreenManager>(services =>
             {
