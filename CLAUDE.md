@@ -58,6 +58,18 @@ desenvolvimento é feito pela sessão **ops** (não há sessão de Remote Contro
   `main`. Medir cada `/HomeScreen/Section/<nome>` antes de ligar uma fileira.
 - O submódulo `jellyfin-web` (fork do autor) não é usado no build; não inicializar.
 
+## Fileiras Encore (fase 2, 2026-10-30)
+
+- `Encore/EncoreCatalog.cs`: títulos em memória (sem versões alternativas), 1,6 s para 1174, renovado a cada dia; gêneros
+  em dois idiomas viram uma chave só. `EncoreHistory`: parte do que o usuário viu, invalidado por `PlaybackFinished`/`TogglePlayed`.
+  `EncoreRecommendations`: lista semanal por usuário em JSON (`encore-recommendations.json`), tarefa domingo 07:20 UTC. `EncoreDraw`: sorteio estável por dia em `America/Sao_Paulo`.
+- Seções em `HomeScreen/Sections/Encore/`: `EncoreGenre`, `EncoreSeriesGenre`, `EncoreAnimeGenre`, `EncoreKeyword`, `EncoreDailyPicks`,
+  `EncoreNational`, `EncoreSeasonal`, `EncoreMyList` (sem cache), `EncoreAlmostDone`, `EncoreWatchAgain`, `EncoreForYou`.
+- A chave da fileira vira classe CSS: só `a-z`, `0-9` e hífen.
+- `CreateInstances` segura a lista inteira de seções: nada pesado ali.
+- Paginação: marcador no fim das fileiras (`IntersectionObserver`), o gatilho de rolagem do autor continua lá. `PageHash` vem do cliente.
+- Nas capturas e testes, o navegador precisa de `locale`: sem ele o Jellyfin lança `Invalid language tag` e as fileiras ficam vazias.
+
 ## Cuidados com o servidor
 
 - **PreProbe do Gelato:** abrir um item por `GET /Items/{id}` ou `/Users/{u}/Items/{id}`, ou pedir `MediaSources`, faz o
