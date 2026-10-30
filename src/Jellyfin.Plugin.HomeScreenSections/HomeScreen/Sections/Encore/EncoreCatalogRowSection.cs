@@ -41,7 +41,8 @@ public abstract class EncoreCatalogRowSection : EncoreSectionBase
         }
 
         HashSet<Guid> finished = m_history.Get(user).Finished;
-        List<EncoreEntry> matches = m_catalog.Entries.Where(x => row.Match(x) && !finished.Contains(x.Id)).ToList();
+        IReadOnlySet<Guid>? scope = m_catalog.ScopeOf(queryCollection);
+        List<EncoreEntry> matches = m_catalog.Entries.Where(x => row.Match(x) && !finished.Contains(x.Id) && (scope == null || scope.Contains(x.Id))).ToList();
 
         // The draw favors the better rated part of the row.
         int poolSize = Math.Max(RowSize * 2, matches.Count * 6 / 10);
@@ -66,6 +67,26 @@ public abstract class EncoreCatalogRowSection : EncoreSectionBase
             instance.AdditionalData = row.Key;
             instance.DisplayText = row.Title;
             yield return instance;
+        }
+    }
+
+    /// <summary>Every row with enough titles in a library or collection; there the draw is only the order.</summary>
+    public IEnumerable<HomeScreenSectionInfo> ViewRows(IReadOnlySet<Guid> scope)
+    {
+        IReadOnlyList<EncoreEntry> entries = m_catalog.Entries;
+        int total = entries.Count(x => scope.Contains(x.Id));
+        foreach (EncoreRow row in Rows)
+        {
+            int count = entries.Count(x => scope.Contains(x.Id) && row.Match(x));
+            if (count < c_minimumItems || count * 10 >= total * 9)
+            {
+                continue; // too short, or nearly the same as the page itself (Nacionais inside Nacionais)
+            }
+
+            EncoreCatalogRowSection instance = (EncoreCatalogRowSection)MemberwiseClone();
+            instance.AdditionalData = row.Key;
+            instance.DisplayText = row.Title;
+            yield return instance.GetInfo();
         }
     }
 

@@ -1,15 +1,18 @@
+using System.Collections.Concurrent;
 using Jellyfin.Data.Enums;
 using Jellyfin.Plugin.HomeScreenSections.Helpers;
 using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.HomeScreenSections.Encore;
 
 /// <summary>What the rows need to know about a title, kept in memory.</summary>
-public sealed record EncoreEntry(Guid Id, bool IsSeries, bool IsAnime, float Rating, HashSet<string> Genres, HashSet<string> Tags, bool IsBrazilian);
+public sealed record EncoreEntry(Guid Id, Guid LibraryId, bool IsSeries, bool IsAnime, float Rating, HashSet<string> Genres, HashSet<string> Tags, bool IsBrazilian);
 
 /// <summary>
 /// The titles of the libraries, without the alternate versions of a title. Rows that need no watch history pick from
@@ -18,6 +21,8 @@ public sealed record EncoreEntry(Guid Id, bool IsSeries, bool IsAnime, float Rat
 public class EncoreCatalog
 {
     private const string c_versionTag = "gelato-stream";
+
+    private static readonly TimeSpan c_collectionLifetime = TimeSpan.FromMinutes(10);
 
     // The catalog mixes TMDB names in English and in Portuguese, and the TV ones join two genres in one.
     private static readonly Dictionary<string, string[]> s_genreAliases = new(StringComparer.OrdinalIgnoreCase)
@@ -63,6 +68,7 @@ public class EncoreCatalog
     private IReadOnlyList<EncoreEntry>? m_entries;
     private DateTime m_builtAt = DateTime.MinValue;
     private int m_refreshing;
+    private readonly ConcurrentDictionary<Guid, (DateTime BuiltAt, IReadOnlySet<Guid> Ids)> m_collections = new();
 
     public EncoreCatalog(ILibraryManager libraryManager, ILogger<EncoreCatalog> logger)
     {
@@ -112,6 +118,30 @@ public class EncoreCatalog
         }
     }
 
+    /// <summary>The titles of the page a row was asked for (the "View" parameter), or null on the home screen.</summary>
+    public IReadOnlySet<Guid>? ScopeOf(IQueryCollection query)
+    {
+        return Guid.TryParse(query["View"], out Guid view) ? Scope(view) : null;
+    }
+
+    /// <summary>The titles of a library or of a collection. Anything else has no titles.</summary>
+    public IReadOnlySet<Guid> Scope(Guid view)
+    {
+        if (m_libraryManager.GetItemById(view) is not BoxSet collection)
+        {
+            return Entries.Where(x => x.LibraryId == view).Select(x => x.Id).ToHashSet();
+        }
+
+        if (m_collections.TryGetValue(view, out (DateTime BuiltAt, IReadOnlySet<Guid> Ids) cached) && DateTime.UtcNow - cached.BuiltAt < c_collectionLifetime)
+        {
+            return cached.Ids;
+        }
+
+        IReadOnlySet<Guid> ids = collection.GetLinkedChildren().Select(x => x.Id).ToHashSet();
+        m_collections[view] = (DateTime.UtcNow, ids);
+        return ids;
+    }
+
     public void Refresh()
     {
         IReadOnlyList<EncoreEntry> entries = Build();
@@ -154,6 +184,7 @@ public class EncoreCatalog
                 HashSet<string> tags = (item.Tags ?? Array.Empty<string>()).Select(x => x.ToLowerInvariant()).ToHashSet();
                 entries.Add(new EncoreEntry(
                     item.Id,
+                    folderId,
                     item is not MediaBrowser.Controller.Entities.Movies.Movie,
                     mixed || tags.Contains("anime"),
                     item.CommunityRating ?? 0,

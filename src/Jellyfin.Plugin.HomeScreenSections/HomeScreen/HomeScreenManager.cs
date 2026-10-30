@@ -53,6 +53,9 @@ namespace Jellyfin.Plugin.HomeScreenSections.HomeScreen
         public void RegisterBuiltInResultsDelegates()
         {
             RegisterResultsDelegate<Sections.Encore.EncoreGenreSection>(); // Encore: own rows
+            RegisterResultsDelegate<Sections.Encore.EncoreViewContinueSection>(); // Encore: own rows
+            RegisterResultsDelegate<Sections.Encore.EncoreViewNextUpSection>(); // Encore: own rows
+            RegisterResultsDelegate<Sections.Encore.EncoreCollectionRowSection>(); // Encore: own rows
             RegisterResultsDelegate<Sections.Encore.EncoreSeriesGenreSection>(); // Encore: own rows
             RegisterResultsDelegate<Sections.Encore.EncoreAnimeGenreSection>(); // Encore: own rows
             RegisterResultsDelegate<Sections.Encore.EncoreKeywordSection>(); // Encore: own rows

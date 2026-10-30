@@ -13,9 +13,12 @@ namespace Jellyfin.Plugin.HomeScreenSections.HomeScreen.Sections.Encore;
 /// <summary>The user's favorites. Not cached: marking a favorite has to show on the next visit, and the query is cheap.</summary>
 public class EncoreMyListSection : EncoreSectionBase
 {
-    public EncoreMyListSection(IUserManager userManager, ILibraryManager libraryManager, IDtoService dtoService)
+    private readonly EncoreCatalog m_catalog;
+
+    public EncoreMyListSection(IUserManager userManager, ILibraryManager libraryManager, IDtoService dtoService, EncoreCatalog catalog)
         : base(userManager, libraryManager, dtoService)
     {
+        m_catalog = catalog;
         DisplayText = "Minha lista";
     }
 
@@ -31,15 +34,16 @@ public class EncoreMyListSection : EncoreSectionBase
             return new QueryResult<BaseItemDto>();
         }
 
+        IReadOnlySet<Guid>? scope = m_catalog.ScopeOf(queryCollection);
         IEnumerable<Guid> favorites = LibraryManager.GetItemList(new InternalItemsQuery(user)
         {
             IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Series },
             IsFavorite = true,
             Recursive = true,
             OrderBy = new[] { (ItemSortBy.SortName, SortOrder.Ascending) },
-            Limit = RowSize + 8,
+            Limit = scope == null ? RowSize + 8 : null,
             DtoOptions = new DtoOptions(false)
-        }).Select(x => x.Id);
+        }).Select(x => x.Id).Where(x => scope == null || scope.Contains(x));
 
         return ReadItems(user, favorites);
     }
@@ -91,10 +95,12 @@ public class EncoreWatchAgainSection : EncoreSectionBase
     private static readonly TimeSpan s_minimumAge = TimeSpan.FromDays(28);
 
     private readonly EncoreHistory m_history;
+    private readonly EncoreCatalog m_catalog;
 
-    public EncoreWatchAgainSection(IUserManager userManager, ILibraryManager libraryManager, IDtoService dtoService, EncoreHistory history)
+    public EncoreWatchAgainSection(IUserManager userManager, ILibraryManager libraryManager, IDtoService dtoService, EncoreHistory history, EncoreCatalog catalog)
         : base(userManager, libraryManager, dtoService)
     {
+        m_catalog = catalog;
         m_history = history;
         DisplayText = "Assistir de novo";
     }
@@ -120,7 +126,8 @@ public class EncoreWatchAgainSection : EncoreSectionBase
                 .Where(x => x.Remaining == 0 && x.Played >= c_minimumEpisodes && x.LastPlayed < cutoff)
                 .Select(x => x.Id));
 
-        return ReadItems(user, EncoreDraw.Shuffle(candidates, user.Id, Section!));
+        IReadOnlySet<Guid>? scope = m_catalog.ScopeOf(queryCollection);
+        return ReadItems(user, EncoreDraw.Shuffle(candidates.Where(x => scope == null || scope.Contains(x)), user.Id, Section!));
     }
 }
 
@@ -129,10 +136,12 @@ public class EncoreForYouSection : EncoreSectionBase
 {
     private readonly EncoreRecommendations m_recommendations;
     private readonly EncoreHistory m_history;
+    private readonly EncoreCatalog m_catalog;
 
-    public EncoreForYouSection(IUserManager userManager, ILibraryManager libraryManager, IDtoService dtoService, EncoreRecommendations recommendations, EncoreHistory history)
+    public EncoreForYouSection(IUserManager userManager, ILibraryManager libraryManager, IDtoService dtoService, EncoreRecommendations recommendations, EncoreHistory history, EncoreCatalog catalog)
         : base(userManager, libraryManager, dtoService)
     {
+        m_catalog = catalog;
         m_recommendations = recommendations;
         m_history = history;
         DisplayText = "Para você";
@@ -151,7 +160,8 @@ public class EncoreForYouSection : EncoreSectionBase
         }
 
         HashSet<Guid> started = m_history.Get(user).Started;
-        IEnumerable<Guid> pool = m_recommendations.GetList(user).Where(x => !started.Contains(x));
+        IReadOnlySet<Guid>? scope = m_catalog.ScopeOf(queryCollection);
+        IEnumerable<Guid> pool = m_recommendations.GetList(user).Where(x => !started.Contains(x) && (scope == null || scope.Contains(x)));
 
         return ReadItems(user, EncoreDraw.Shuffle(pool, user.Id, Section!));
     }
