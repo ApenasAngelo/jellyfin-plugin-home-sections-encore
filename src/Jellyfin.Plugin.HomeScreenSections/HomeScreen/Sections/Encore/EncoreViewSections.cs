@@ -41,7 +41,8 @@ public class EncoreViewContinueSection : EncoreSectionBase
 
         IEnumerable<Guid> items = LibraryManager.GetItemList(new InternalItemsQuery(user)
         {
-            IncludeItemTypes = new[] { BaseItemKind.Movie, BaseItemKind.Episode },
+            MediaTypes = new[] { MediaType.Video }, // by media type, as the author's row: by item type it took 1.3 s against 0.07 s
+            IsVirtualItem = false,
             IsResumable = true,
             Recursive = true,
             OrderBy = new[] { (ItemSortBy.DatePlayed, SortOrder.Descending) },
