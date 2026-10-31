@@ -51,6 +51,7 @@
     // older one then redraws rows the newer one is filling, which can leave them hidden. Rows of another page leave at once.
     if (page === null) {
         window.HssEncoreLoad = (window.HssEncoreLoad || 0) + 1;
+        window.HssEncoreRowsAbove = null;
         if (elem && elem.dataset.encoreView !== undefined && elem.dataset.encoreView !== (encoreView || '')) { elem.innerHTML = ''; }
     }
     var encoreLoad = window.HssEncoreLoad;
@@ -106,6 +107,28 @@
         }
     }
     
+    // Encore: rows answer in any order, and one appearing above pushes the others down. Each row shows only after the ones above it
+    // have answered, so the page only grows at the bottom. A slow row stops holding the others after a moment.
+    function encoreRevealInOrder(row, fetchData) {
+        var HOLD_LIMIT = 1500;
+        var above = window.HssEncoreRowsAbove || Promise.resolve();
+        var answered;
+        var own = new Promise(function (resolve) { answered = resolve; });
+        row.classList.add('encoreRowWaiting');
+        setTimeout(function () { row.classList.remove('encoreRowWaiting'); }, 8000); // whatever happens to the requests, the row is not lost
+        window.HssEncoreRowsAbove = above.then(function () {
+            return Promise.race([own, new Promise(function (resolve) { setTimeout(resolve, HOLD_LIMIT); })]);
+        });
+        Promise.all([above, own]).then(function () {
+            setTimeout(function () { row.classList.remove('encoreRowWaiting'); }, 0); // after the cards are in
+        });
+        return function () {
+            var answer = fetchData.apply(this, arguments);
+            answer.then(answered, answered);
+            return answer;
+        };
+    }
+
     function getHomeScreenSectionItemsHtmlFn(useEpisodeImages, enableOverflow, sectionKey, cardBuilder, getShapeFn, imageHelper, appRouter, additionalSettings) {
         if (sectionKey === "DiscoverMovies" || sectionKey === "DiscoverTV" || sectionKey === "Discover") {
             return createDiscoverCards;
@@ -369,7 +392,7 @@
                     ShowDetailsMenu: sectionInfo.ShowDetailsMenu
                 }
                 
-                itemsContainer.fetchData = getHomeScreenSectionFetchFn(apiClient.serverId(), sectionInfo, u.A, userSettings);
+                itemsContainer.fetchData = encoreRevealInOrder(elem, getHomeScreenSectionFetchFn(apiClient.serverId(), sectionInfo, u.A, userSettings));
                 
                 var shapeBuilder = {{shapebuilder_hook}};
                 

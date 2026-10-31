@@ -115,3 +115,23 @@
     display: flex;
     flex-direction: column;
 }
+
+/* Encore: rows waiting for the ones above them, and entering without a jump */
+.homeSectionsContainer > .verticalSection.encoreRowWaiting {
+    display: none !important;
+}
+
+.homeSectionsContainer > .verticalSection {
+    animation: encoreRowIn 0.25s ease-out;
+}
+
+@keyframes encoreRowIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .homeSectionsContainer > .verticalSection {
+        animation: none;
+    }
+}
