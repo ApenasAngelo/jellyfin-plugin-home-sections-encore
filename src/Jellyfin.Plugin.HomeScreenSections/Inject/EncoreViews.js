@@ -8,6 +8,7 @@
     var known = null, asked = false, lastHash = null;
     var saved = {}, last = null, restoring = null; // where each page was left, for the way back to it
     var emptySince = null, healed = 0;
+    var redrawFor = null, REDRAW_WAIT = 5000;
 
     function params(hash) {
         return new URLSearchParams((hash || '').split('?')[1] || '');
@@ -83,6 +84,11 @@
             return;
         }
         if (sections.dataset.encoreView !== (current() || '')) {
+            // The redraw only marks the page when it starts, which takes a while on a busy page: asking again would load it twice.
+            if (redrawFor && redrawFor.hash === location.hash && Date.now() - redrawFor.at < REDRAW_WAIT) {
+                return;
+            }
+            redrawFor = { hash: location.hash, at: Date.now() };
             sections.dispatchEvent(new CustomEvent('settingschange'));
             (document.scrollingElement || document.body).scrollTop = 0;
             document.body.scrollTop = 0;
